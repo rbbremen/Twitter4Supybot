@@ -1,4 +1,4 @@
-# -*- coding: ascii -*-
+# -*- coding: utf-8 -*-
 #
 # Twitter4Supybot - A plugin to access services at twitter.com
 # Copyright (C) 2011 Robert Bergermann (rbergermann at googlemail dot com)

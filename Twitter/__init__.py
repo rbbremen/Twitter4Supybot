@@ -1,4 +1,4 @@
-# -*- coding: ascii -*-
+# -*- coding: utf-8 -*-
 #
 # Twitter4Supybot - A plugin to access services at twitter.com
 # Copyright (C) 2011 Robert Bergermann (rbergermann at googlemail dot com)
@@ -39,7 +39,7 @@ __version__ = "0.20"
 __contributors__ = {}
 
 # This is a url where the most recent plugin package can be downloaded.
-__url__ = 'http://85.25.63.54/Twitter4Supybot.zip'
+__url__ = 'http://85.25.63.54/Twitter4Supybot.tar.gz'
 
 import config
 import plugin

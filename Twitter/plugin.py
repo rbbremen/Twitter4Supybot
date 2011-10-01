@@ -1,4 +1,4 @@
-# -*- coding: ascii -*-
+# -*- coding: utf-8 -*-
 #
 # Twitter4Supybot - A plugin to access services at twitter.com
 # Copyright (C) 2011 Robert Bergermann (rbergermann at googlemail dot com)
@@ -95,7 +95,6 @@ class Twitter(callbacks.Plugin):
                 import MySQLdb
                 self.conn = MySQLdb.connect(RDBhost, RDBuser, RDBpass, \
                 RDBdb, int(RDBport))
-
             if RDBsql == "postgresql":
                 import psycopg2
                 conStr = "dbname=%s user=%s password=%s host=%s \
@@ -167,7 +166,6 @@ class Twitter(callbacks.Plugin):
                     irc.reply(x)
                     if self.UseRDB == True:
                         self.conn.query(InsQry(x))
-
         else:
             irc.error('The Twitter.twfriends command is not configured. If is '
                       'installed, reconfigure the '
@@ -225,7 +223,6 @@ class Twitter(callbacks.Plugin):
                     self.db.set('friends', x, x[5:25] )
                     irc.reply(x)
                     # irc.reply('\x03'+'11,14'+x)
-
         else:
             irc.error('The Twitter.twglobal command is not configured. If is '
                       'installed, reconfigure the '
@@ -281,7 +278,6 @@ class Twitter(callbacks.Plugin):
                     # self.log.debug('friends: line not in db-Cache!')
                     self.db.set('friends', x, x[5:25] )
                     irc.reply(x)
-
         else:
             irc.error('The Twitter.twreplies command is not configured. If is '
                       'installed, reconfigure the '
