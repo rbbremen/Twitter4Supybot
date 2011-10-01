@@ -57,7 +57,7 @@ from where command was executed. Use the Scheduler plugin for automation.
 
 The estimated number of rows, in dependency of time between two calls,
 has to be a lower value as configured as default. Else you will loose
-rows if you don´t poll the next lines fast enough. I follow only 100
+rows if you do not poll the next lines fast enough. I follow only 100
 feeds with low traffic so 20 lines in twitter-lib and a call every 60
 seconds works fine for me.
 Supybot-Cmd 'scheduler repeat twf 60 twfriends'
