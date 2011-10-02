@@ -32,14 +32,14 @@ __author__ = supybot.authors.robbe
 
 # Use this for the version of this plugin.  You may wish to put a CVS keyword
 # in here if you're keeping the plugin in CVS or some similar system.
-__version__ = "0.20"
+__version__ = "0.21"
 
 # This is a dictionary mapping supybot.Author instances to lists of
 # contributions.
 __contributors__ = {}
 
 # This is a url where the most recent plugin package can be downloaded.
-__url__ = 'http://85.25.63.54/Twitter4Supybot.tar.gz'
+__url__ = 'http://85.25.63.54/supybot/twitter4supybot.tar.gz'
 
 import config
 import plugin

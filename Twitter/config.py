@@ -50,32 +50,32 @@ conf.registerGlobalValue(Twitter, 'optionsR',
     registry.String('replies -t -d', """Determines what
     options will be used for the twitter command replies."""))
 
-conf.registerGlobalValue(Twitter, 'UseRDB',
+conf.registerGlobalValue(Twitter, 'rdbActive',
     registry.Boolean(False, """Determines whether database management
     is active or not.""")) 
 
-conf.registerGlobalValue(Twitter, 'RDBsql',
+conf.registerGlobalValue(Twitter, 'rdbSql',
     registry.String('postgresql', """Determines the used
-    database server for storing information and received
-    tweets etc. Possible values are 'mysql' and 'postgresql'."""))
+    relational database management system for storing tweets.
+    Possible values are 'mysql' and 'postgres'."""))
 
-conf.registerGlobalValue(Twitter, 'RDBhost',
-    registry.String('localhost', """Determines the domainname or ipaddr
+conf.registerGlobalValue(Twitter, 'rdbHost',
+    registry.String('localhost', """Determines the host
     of the database server. default: localhost"""))
 
-conf.registerGlobalValue(Twitter, 'RDBport',
+conf.registerGlobalValue(Twitter, 'rdbPort',
     registry.String('5432', """Determines the port for the
     database server. default ports: mysql 3306, postgresql 5432"""))
 
-conf.registerGlobalValue(Twitter, 'RDBdb',
+conf.registerGlobalValue(Twitter, 'rdbName',
     registry.String('Twitter', """Determines the name of the
     database used on server."""))
 
-conf.registerGlobalValue(Twitter, 'RDBuser',
+conf.registerGlobalValue(Twitter, 'rdbUser',
     registry.String('fanboy', """Determines the name
     of the useraccount on database server."""))
 
-conf.registerGlobalValue(Twitter, 'RDBpass',
+conf.registerGlobalValue(Twitter, 'rdbPassword',
     registry.String('secret', """Determines the used
     password for account on the database server."""))
 

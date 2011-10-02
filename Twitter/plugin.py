@@ -31,22 +31,14 @@ import supybot.plugins as plugins
 import supybot.ircutils as ircutils
 import supybot.callbacks as callbacks
 
-def InsQry(twitt):
-    """Create the SQL INSERT String """
-    tbl='                                 !' + \
-    "'#$%&\'()*+,-./0123456789:;<=>?@" + \
-    'ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~ ' + \
-    '                 ' + \
-    '                 ' + \
-    '                 ' + \
-    '                 ' + \
-    '                 ' + \
-    '                 ' + \
-    '                 ' + \
-    '         '
-    InsQry = 'INSERT INTO tblTwitter (twitt) VALUES ("' + \
-    twitt.translate(tbl) + '");'
-    return InsQry
+
+def InsertQuery(tweetStr):
+    """Build the SQL-Query. We have to replace the string
+    terminator inside the tweet to avoid an error..."""
+    InsertQuery = "INSERT INTO tblTwitter (twitt) VALUES ('" + \
+    tweetStr.replace("'", "`") + "'); COMMIT;"
+    return InsertQuery
+
 
 class CdbTwitterDB(object):
     def __init__(self, filename):
@@ -72,47 +64,48 @@ class CdbTwitterDB(object):
 
 TwitterDB = plugins.DB('Twitter', {'cdb': CdbTwitterDB})
 
+
 class Twitter(callbacks.Plugin):
     """This plugin is for accessing a Twitter account"""
     threaded = False
-    UseRDB = False
+    rdbActive = False
+    rdbSql = ""
     conn = ""
+    curs = ""
 
     def __init__(self, irc):
         self.__parent = super(Twitter, self)
         self.__parent.__init__(irc)
         self.lastRequest = ""
         self.db = TwitterDB()
-        self.UseRDB = self.registryValue('UseRDB')
-        if self.UseRDB == True:
-            RDBsql  = self.registryValue('RDBsql')
-            RDBhost = self.registryValue('RDBhost')
-            RDBport = self.registryValue('RDBport')
-            RDBdb   = self.registryValue('RDBdb')
-            RDBuser = self.registryValue('RDBuser')
-            RDBpass = self.registryValue('RDBpass')
-            if RDBsql == "mysql":
+        self.rdbActive = self.registryValue('rdbActive')
+        if self.rdbActive == True:
+            self.rdbSql  = self.registryValue('rdbSql')
+            rdbHost = self.registryValue('rdbHost')
+            rdbPort = self.registryValue('rdbPort')
+            rdbName   = self.registryValue('rdbName')
+            rdbUser = self.registryValue('rdbUser')
+            rdbPassword = self.registryValue('rdbPassword')
+            if self.rdbSql == 'mysql':
                 import MySQLdb
-                self.conn = MySQLdb.connect(RDBhost, RDBuser, RDBpass, \
-                RDBdb, int(RDBport))
-            if RDBsql == "postgresql":
+                self.conn = MySQLdb.connect(rdbHost, rdbUser, rdbPassword, \
+                rdbName, int(rdbPort))
+            else:
                 import psycopg2
-                conStr = "dbname=%s user=%s password=%s host=%s \
-                port=%s" % (RDBdb, RDBuser, RDBpass, RDBhost, RDBport)
-                self.conn = psycopg2.connect( )
+                DSN = 'dbname=%s user=%s password=%s host=%s port=%s' \
+                % (rdbName, rdbUser, rdbPassword, rdbHost, rdbPort)
+                self.conn = psycopg2.connect(DSN)
+                self.curs = self.conn.cursor()
 
     def die(self):
         self.db.close()
-        if self.UseRDB == True:
+        if self.rdbActive == True:
             self.conn.close()
 
     def __call__(self, irc, msg):
         self.__parent.__call__(irc, msg)
         irc = callbacks.SimpleProxy(irc, msg)
 
-    def twversion(self, irc, msg, args):
-        """Returns version of this plugin"""
-        irc.reply("TwitterPlugin v0.20")
 
     def twfriends(self, irc, msg, args):
         """takes no arguments
@@ -120,6 +113,7 @@ class Twitter(callbacks.Plugin):
         """
         cmdTwitter =  self.registryValue('command')
         cmdTwitter += ' ' + self.registryValue('optionsF')
+        self.log.debug('twfriends: cmdline %s', cmdTwitter)
         if cmdTwitter:
             args = [cmdTwitter]
             try:
@@ -161,16 +155,20 @@ class Twitter(callbacks.Plugin):
                 try:
                     twID = self.db.get('friends', x)
                 except KeyError:
-                    # self.log.debug('friends: line not in db-Cache!')
-                    self.db.set('friends', x, x[5:25] )
+                    self.db.set( 'friends', x, x[5:25] )
                     irc.reply(x)
-                    if self.UseRDB == True:
-                        self.conn.query(InsQry(x))
+                    if self.rdbActive == True:
+                        if self.rdbSql == 'postgres':
+                            self.curs.execute(InsertQuery(x))
+                        else:
+                            self.conn.query(InsertQuery(x))
         else:
             irc.error('The Twitter.twfriends command is not configured. If is '
                       'installed, reconfigure the '
                       'supybot.plugins.Twitter.command and optionsF '
                       'variable appropriately.')
+
+
 
     def twglobal(self, irc, msg, args):
         """takes no arguments
@@ -219,15 +217,15 @@ class Twitter(callbacks.Plugin):
                 try:
                     twID = self.db.get('global', x)
                 except KeyError:
-                    # self.log.debug('friends: line not in db-Cache!')
-                    self.db.set('friends', x, x[5:25] )
+                    self.db.set( 'friends', x, x[5:25] )
                     irc.reply(x)
-                    # irc.reply('\x03'+'11,14'+x)
         else:
             irc.error('The Twitter.twglobal command is not configured. If is '
                       'installed, reconfigure the '
                       'supybot.plugins.Twitter.command and optionsG '
                       'variable appropriately.')
+
+
 
     def twreplies(self, irc, msg, args):
         """takes no arguments
@@ -235,6 +233,7 @@ class Twitter(callbacks.Plugin):
         """
         cmdTwitter =  self.registryValue('command')
         cmdTwitter += ' ' + self.registryValue('optionsR')
+        self.log.debug('twreplies: cmdline %s', cmdTwitter)
         if cmdTwitter:
             args = [cmdTwitter]
             try:
@@ -275,8 +274,7 @@ class Twitter(callbacks.Plugin):
                 try:
                     twID = self.db.get('replies', x)
                 except KeyError:
-                    # self.log.debug('friends: line not in db-Cache!')
-                    self.db.set('friends', x, x[5:25] )
+                    self.db.set( 'friends', x, x[5:25] )
                     irc.reply(x)
         else:
             irc.error('The Twitter.twreplies command is not configured. If is '
