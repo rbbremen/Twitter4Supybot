@@ -32,12 +32,14 @@ import supybot.ircutils as ircutils
 import supybot.callbacks as callbacks
 
 
-def InsertQuery(tweetStr):
-    """Build the SQL-Query. We have to replace the string
-    terminator inside the tweet to avoid an error..."""
-    InsertQuery = "INSERT INTO tblTwitter (twitt) VALUES ('" + \
-    tweetStr.replace("'", "`") + "'); COMMIT;"
-    return InsertQuery
+
+def pgsqlinsert(curs, msg):
+    curs.execute("""INSERT INTO tblTwitter (twitt) VALUES (%s)""", (msg,))
+
+
+def mysqlinsert(conn, msg):
+    curs = conn.cursor()
+    curs.execute("""INSERT INTO tblTwitter (twitt) VALUES (%s)""", (msg,))
 
 
 class CdbTwitterDB(object):
@@ -88,13 +90,16 @@ class Twitter(callbacks.Plugin):
             rdbPassword = self.registryValue('rdbPassword')
             if self.rdbSql == 'mysql':
                 import MySQLdb
-                self.conn = MySQLdb.connect(rdbHost, rdbUser, rdbPassword, \
-                rdbName, int(rdbPort))
+                self.conn = MySQLdb.connect(rdbHost, rdbUser, \
+                    rdbPassword, rdbName, int(rdbPort))
             else:
                 import psycopg2
+                import psycopg2.extensions
                 DSN = 'dbname=%s user=%s password=%s host=%s port=%s' \
                 % (rdbName, rdbUser, rdbPassword, rdbHost, rdbPort)
                 self.conn = psycopg2.connect(DSN)
+                self.conn.set_isolation_level( \
+                    psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
                 self.curs = self.conn.cursor()
 
     def die(self):
@@ -132,7 +137,7 @@ class Twitter(callbacks.Plugin):
             lines = filter(None, lines)
             neues = []
             for x in lines:
-                # for each line in lines, frist try to get the last if exists
+                # for each line in lines, first try to get the last if exists
                 try:
                     last = neues.pop()
                 except IndexError:
@@ -159,9 +164,10 @@ class Twitter(callbacks.Plugin):
                     irc.reply(x)
                     if self.rdbActive == True:
                         if self.rdbSql == 'postgres':
-                            self.curs.execute(InsertQuery(x))
+                            pgsqlinsert(self.curs, x)
                         else:
-                            self.conn.query(InsertQuery(x))
+                            mysqlinsert(self.conn, x)
+
         else:
             irc.error('The Twitter.twfriends command is not configured. If is '
                       'installed, reconfigure the '
@@ -195,7 +201,7 @@ class Twitter(callbacks.Plugin):
             lines = filter(None, lines)
             neues = []
             for x in lines:
-                # for each line in lines, frist try to get the last if exists
+                # for each line in lines, first try to get the last if exists
                 try:
                     last = neues.pop()
                 except IndexError:
@@ -252,7 +258,7 @@ class Twitter(callbacks.Plugin):
             lines = filter(None, lines)
             neues = []
             for x in lines:
-                # for each line in lines, frist try to get the last if exists
+                # for each line in lines, first try to get the last if exists
                 try:
                     last = neues.pop()
                 except IndexError:
