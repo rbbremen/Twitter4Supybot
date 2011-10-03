@@ -18,6 +18,11 @@ https://sourceforge.net/projects/supybot/
 Thanx to James Vega and Jeremy Fincher for this
 Swiss knife IRC bot!
 
+last version of this plugin is available at
+https://sourceforge.net/projects/rbbremen.u/files/
+https://github.com/rbbremen/Twitter4Supybot
+https://85.25.63.54/supybot/twitter4supybot.tar.gz
+
 Requirements:
 
   - Python 2.5 or newer, running on Linux 
